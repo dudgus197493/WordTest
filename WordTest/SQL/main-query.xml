@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>main-query.xml file</comment>
+	
+	<!-- 로그인 -->
+	<entry key="login">
+		SELECT MEMBER_NO, MEMBER_ID, MEMBER_NM, MEMBER_NNO, MEMBER_GENDER, TIER_LEVEL, ADMIN_FL, EMAIL,
+		TO_CHAR(ENROLL_DT, 'YYYY"년" MM"월" DD"일" HH24:MI:SS') ENROLL_DT
+		FROM "MEMBER"
+		WHERE MEMBER_ID = ?
+		AND MEMBER_PW = ?
+		AND SECESSION_FL = 'N'
+	</entry>
+	
+	<!-- 회원 가입 -->
+	<entry key="signUp">
+		INSERT INTO "MEMBER" (MEMBER_NO, MEMBER_ID, MEMBER_PW, MEMBER_NM, MEMBER_NNO ,MEMBER_GENDER)
+		VALUES (SEQ_MEMBER_PK.NEXTVAL, ?, ?, ?, ?, ?)
+	</entry>
+	
+	<!-- 아이디 중복 확인 -->
+	<entry key="idDupCheck">
+		SELECT COUNT(*) ID_CHECK
+		FROM "MEMBER"
+		WHERE MEMBER_ID = ?
+		AND SECESSION_FL = 'N'
+	</entry>
+	
+	<!-- 아이디 찾기 -->
+	<entry key="findMemberId">
+		SELECT MEMBER_ID 
+		FROM "MEMBER"
+		WHERE MEMBER_NM = ?
+		AND MEMBER_NNO = ?
+		AND SECESSION_FL = 'N'
+	</entry> 
+	
+	<!-- 비밀번호 찾기 -->
+	<entry key="findMemberPw">
+		SELECT MEMBER_NO, MEMBER_PW
+		FROM "MEMBER"
+		WHERE MEMBER_NM = ?
+		AND MEMBER_NNO = ?
+		AND MEMBER_ID = ?
+		AND SECESSION_FL = 'N'
+	</entry> 
+</properties>

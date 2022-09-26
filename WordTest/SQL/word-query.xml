@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>word-query.xml file</comment>
+	
+	<!-- 모든 단어 조회 -->
+	<entry key="selectAllWord">
+		SELECT WORD_NO, WORD_NM, MEANING.POS_CODE, MEANING_NO, MEANING_NM,
+			(SELECT POS_NM FROM PART_OF_SPEECH P WHERE P.POS_CODE = MEANING.POS_CODE) POS_NM
+		FROM WORD
+		JOIN MEANING USING(WORD_NO)
+		WHERE WORD.DELETE_FL = 'N'
+		AND MEANING.DELETE_FL = 'N'
+	</entry>
+	
+	<!-- 단어 한개 조회 -->
+	<entry key="selectWord">
+		SELECT WORD_NO, WORD_NM, MEANING.POS_CODE, MEANING_NO, MEANING_NM,
+			(SELECT POS_NM FROM PART_OF_SPEECH P WHERE P.POS_CODE = MEANING.POS_CODE) POS_NM
+		FROM WORD
+		JOIN MEANING USING(WORD_NO)
+		WHERE WORD.DELETE_FL = 'N'
+		AND MEANING.DELETE_FL = 'N'
+		AND WORD_NM = ?
+	</entry>>
+	
+	
+	<!-- 단어 검색 -->
+	<entry key="searchWord1">
+		SELECT WORD_NO, WORD_NM, MEANING.POS_CODE, MEANING_NO, MEANING_NM,
+			(SELECT POS_NM FROM PART_OF_SPEECH P WHERE P.POS_CODE = MEANING.POS_CODE) POS_NM
+		FROM WORD
+		JOIN MEANING USING(WORD_NO)
+		WHERE WORD.DELETE_FL = 'N'
+		AND MEANING.DELETE_FL = 'N'
+	</entry>
+	<!-- 조건 -->
+	<entry key="searchWord2_1">	<!-- 키워드 -->
+		AND WORD_NM LIKE '%'|| ? ||'%'
+	</entry>
+	<entry key="searchWord2_2">	<!-- 뜻 -->
+		AND MEANING_NM LIKE '%'|| ? ||'%'
+	</entry>
+	<entry key="searchWord2_3">	<!-- 품사 -->
+		AND POS_CODE IN (SELECT POS_CODE FROM PART_OF_SPEECH WHERE POS_NM LIKE '%'|| ? ||'%')
+	</entry>
+	<!-- 정렬 -->
+	<entry key="searchWord3">
+		ORDER BY 1
+	</entry>
+	
+	<!-- 다음 단어 번호 구하기 -->
+	<entry key="nextWordNo">
+		SELECT SEQ_WORD_PK.NEXTVAL WORD_NO FROM DUAL
+	</entry>
+	
+	<!-- 단어(ENG) 추가 -->
+	<entry key="insertWord">
+		INSERT INTO WORD VALUES (?, ?, DEFAULT)
+	</entry>
+	
+	<!-- 뜻 추가 -->
+	<entry key="isertMeaning">
+		INSERT INTO MEANING VALUES (SEQ_MEANING_PK.NEXTVAL, ?, ?, (SELECT POS_CODE FROM PART_OF_SPEECH WHERE POS_NM = ?), DEFAULT)
+	</entry>
+</properties>
