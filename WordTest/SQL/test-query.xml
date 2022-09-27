@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>test-query.xml file</comment>
+	
+	<!-- 랜덤 단어(각 랜덤 뜻 1개) 10개 조회 -->
+	<entry key="selectRandomWord">
+		SELECT * FROM
+			(SELECT WORD_NO, WORD_NM, 
+				(SELECT MEANING_NM FROM 
+					(SELECT MEANING_NM
+					FROM MEANING
+					WHERE MEANING.WORD_NO = WORD.WORD_NO
+					AND DELETE_FL = 'N'
+					ORDER BY DBMS_RANDOM.VALUE)
+				WHERE ROWNUM &lt; 2) MEANING_NM
+			FROM WORD
+			WHERE DELETE_FL = 'N' 
+			ORDER BY DBMS_RANDOM.VALUE)
+		WHERE ROWNUM &lt; 11
+	</entry>
+	
+	<!-- 랜덤 뜻 40개 (먼저 가져온 단어 제외) 가져오기 -->
+	<entry key="selectRandomMeaning">
+		SELECT * 
+		FROM (SELECT MEANING_NM 
+			FROM MEANING
+			WHERE WORD_NO NOT IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ORDER BY DBMS_RANDOM.VALUE)
+		WHERE ROWNUM &lt; 41
+	</entry>
+	
+	<!-- 다음 시험번호 구하기 -->
+	<entry key="nextTestNo">
+		SELECT SEQ_TEST_RECODE_PK.NEXTVAL RECODE_NO FROM DUAL
+	</entry>
+	
+	<!-- 시험 기록 등록 -->
+	<entry key="insertTestRecode">
+		INSERT INTO TEST_RECODE (TEST_NO, TEST_SCORE, MEMBER_NO)
+		VALUES(?, ?, ?)
+	</entry>
+	
+	<!-- 첫 기록 여부 확인 -->
+	<entry key="checkFirstRecode">
+		SELECT COUNT(*) CHECK_FIRST FROM WORD_RECODE WHERE MEMBER_NO = ?
+	</entry>
+
+	<!-- 단어 기록 등록 -->
+	<entry key="insertWordRecode">
+		INSERT INTO WORD_RECODE (RECODE_NO, MEMBER_NO, WORD_NO)
+		VALUES(SEQ_WORD_RECODE_PK.NEXTVAL, ?, ?)
+	</entry>
+	
+	<!-- 파라미터 값중 WORD_RECODE 테이블에 등록되있지 않은 단어 번호 가져오기 -->
+	<entry key="checkWordRecode">
+		SELECT COUNT(*) "CHECK"
+		FROM WORD_RECODE
+		WHERE WORD_NO = ?
+		AND MEMBER_NO = ?
+	</entry>
+	
+	<!-- 단어 기록 카운트 증가 (정답 횟수) -->
+	<entry key="updateWordCount1">
+		UPDATE WORD_RECODE SET
+		ACCURATE_COUNT = ACCURATE_COUNT + 1
+		WHERE WORD_NO = ?
+		AND MEMBER_NO = ?
+	</entry>
+	
+	<!-- 단어 기록 카운트 증가 (오답 횟수) -->
+	<entry key="updateWordCount2">
+		UPDATE WORD_RECODE SET
+		WRONG_COUNT = WRONG_COUNT + 1
+		WHERE WORD_NO = ?
+		AND MEMBER_NO = ?
+	</entry>
+	
+	<!-- 단어 기록 존재 여부 -->
+	
+</properties>

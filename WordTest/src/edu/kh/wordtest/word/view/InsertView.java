@@ -256,7 +256,7 @@ public class InsertView {
 						// 정말 추가할거냐고 물어보기
 						char ch = 'A';
 						while(true) {
-							System.out.println("\n[유사한 뜻이 이미 존재합니다.]");
+							System.out.println("\n << 경고 >> : 유사한 뜻이 이미 존재합니다.");
 							System.out.println("[기존의 뜻]");
 							System.out.printf("%s : %s\n", currentPosName, currentMeaningName);
 							System.out.println("[추가할 뜻]");

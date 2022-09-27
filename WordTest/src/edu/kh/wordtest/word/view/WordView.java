@@ -18,9 +18,8 @@ public class WordView {
 		boolean isAdmin = MainView.loginMember.getAdminFlag().equals("Y");
 		try {
 			do {
-				System.out.println("\n***** 단어 메뉴 *****\n");
+				System.out.println("\n***** 단어 사전 *****\n");
 				System.out.println("1. 단어 검색");
-				System.out.println("2. 단어 테스트");
 				if(isAdmin) {
 					System.out.println("3. 단어 추가");
 					System.out.println("4. 단어 수정");

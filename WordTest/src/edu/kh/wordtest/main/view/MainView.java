@@ -9,11 +9,13 @@ import edu.kh.wordtest.member.model.service.MemberService;
 import edu.kh.wordtest.member.model.service.MemberServiceImpl;
 import edu.kh.wordtest.member.view.MemberView;
 import edu.kh.wordtest.member.vo.Member;
+import edu.kh.wordtest.test.view.TestView;
 import edu.kh.wordtest.word.view.WordView;
 
 public class MainView {
 	private MemberView mView = new MemberView(); 
 	private WordView wView = new WordView();
+	private TestView tView = new TestView();
 	
 	private MainService mainService = new MainServiceImpl();
 	private MemberService memberService = new MemberServiceImpl();
@@ -50,7 +52,7 @@ public class MainView {
 			} else {
 					System.out.printf("\n***** %s의 메뉴 *****\n\n", loginMember.getMemberName());
 					System.out.println("1. 회원 기능");
-					System.out.println("2. 단어 공부");
+					System.out.println("2. 단어 사전");
 					System.out.println("3. 단어 테스트");
 					System.out.println("0. 로그아웃");
 					System.out.println("99. 프로그램 종료");
@@ -62,7 +64,7 @@ public class MainView {
 					switch(input) {
 					case 1: mView.memberMenu(); break;			// 회원 관련 메뉴
 					case 2: wView.wordMenu(); break;			// 단어 관련 메뉴
-					case 3: break;
+					case 3: tView.testMenu(); break;
 					case 0: 
 						loginMember = null; 
 						input = -1;
