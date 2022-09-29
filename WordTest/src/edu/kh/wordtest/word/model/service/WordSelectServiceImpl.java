@@ -46,4 +46,15 @@ public class WordSelectServiceImpl implements WordSelectService{
 		return word;
 	}
 
+	@Override
+	public List<Word> selectConquestWord(int memberNo) throws Exception {
+		Connection conn = getConnection();
+		
+		List<Word> wordList = dao.selectConquestWord(conn, memberNo);
+		
+		close(conn);
+		
+		return wordList;
+	}
+
 }

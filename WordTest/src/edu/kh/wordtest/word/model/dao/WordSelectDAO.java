@@ -5,7 +5,11 @@ import java.util.List;
 
 import edu.kh.wordtest.word.vo.Word;
 
-public interface WordSelectDAO {
+/**
+ * @author Tonic
+ *
+ */
+public interface WordSelectDAO{
 	
 	/** 모든 단어 검색 DAO
 	 * @param conn
@@ -30,4 +34,11 @@ public interface WordSelectDAO {
 	 * @throws Exception
 	 */
 	public List<Word> searchWord(Connection conn, String keyword, int condition) throws Exception;
+	
+	/** 회원별 정복한 단어 조회 DAO
+	 * @param conn
+	 * @return wordList
+	 * @throws Exception
+	 */
+	public List<Word> selectConquestWord(Connection conn, int memberNo) throws Exception;
 }

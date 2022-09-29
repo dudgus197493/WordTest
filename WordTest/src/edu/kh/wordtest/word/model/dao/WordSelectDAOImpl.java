@@ -153,4 +153,52 @@ public class WordSelectDAOImpl implements WordSelectDAO{
 		
 		return word;
 	}
+
+	@Override
+	public List<Word> selectConquestWord(Connection conn, int memberNo) throws Exception {
+		List<Word> wordList = new ArrayList<>();
+		try {
+			String sql = prop.getProperty("selectAccurateWord");
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, memberNo);
+			
+			rs = pstmt.executeQuery();
+			
+			int count = 0;
+			String prevWord = "";
+			while(rs.next()) {
+				String currentWord = rs.getString("WORD_NM");
+				if(prevWord.equals(currentWord)) {	// 이전 단어와 같다면
+					Meaning meaning = new Meaning();						// 새로운 Meaning 객체 생성
+					meaning.setPosCode(rs.getString("POS_CODE"));
+					meaning.setPosName(rs.getString("POS_NM"));
+					meaning.setMeaningNo(rs.getInt("MEANING_NO"));
+					meaning.setmeaningName(rs.getString("MEANING_NM"));
+					wordList.get(count-1).setMeaning(meaning); 
+				} else {							// 새로운 단어라면
+					Word word = new Word();
+					word.setWordNo(rs.getInt("WORD_NO"));
+					word.setWordName(rs.getString("WORD_NM"));
+					word.setAccurateCount(rs.getInt("ACCURATE_COUNT"));
+					word.setWrongCount(rs.getInt("WRONG_COUNT"));
+					prevWord = word.getWordName();
+					
+					Meaning meaning = new Meaning();
+					meaning.setPosCode(rs.getString("POS_CODE"));
+					meaning.setPosName(rs.getString("POS_NM"));
+					meaning.setMeaningNo(rs.getInt("MEANING_NO"));
+					meaning.setmeaningName(rs.getString("MEANING_NM"));
+					
+					word.setMeaning(meaning);
+					wordList.add(word);
+					count++;
+				}
+			}
+			
+		}finally {
+			close(rs);
+			close(pstmt);
+		}
+		return wordList;
+	}
 }

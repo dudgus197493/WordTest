@@ -9,7 +9,7 @@ public class TestPaper {
 	private int testScore;			// 시험 점수
 	private String testDate;		// 시험 날짜
 	private int memberNo;			// 시험 본 회원 번호
-	
+	private String memberName;		// 응시자
 	// 시험 문제 리스트 (10개)
 	private List<Question> questionList;
 	
@@ -49,8 +49,19 @@ public class TestPaper {
 		this.memberNo = memberNo;
 	}
 
+	public String getMemberName() {
+		return memberName;
+	}
+
+	public void setMemberName(String memberName) {
+		this.memberName = memberName;
+	}
+
 	public List<Question> getQuestionList() {
 		return questionList;
+	}
+	public void setQuesion(Question question) {
+		this.questionList.add(question);
 	}
 
 	public void setQuestionList(List<Question> questionList) {

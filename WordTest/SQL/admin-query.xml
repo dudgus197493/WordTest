@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>admin-query.xml file</comment>
+	
+	<!-- 단어 삭제 -->
+	<entry key="deleteWord">
+		UPDATE WORD SET
+		DELETE_FL = 'Y'
+		WHERE WORD_NO = ?
+		AND DELETE_FL = 'N'
+	</entry>
+	
+	<!-- 단어 스펠링 수정 -->
+	<entry key="updateWord">
+		UPDATE WORD SET
+		WORD_NM = ?
+		WHERE WORD_NO = ?
+		AND DELETE_FL = 'N'
+	</entry>
+	
+	<!-- 단어 뜻 수정 -->
+	<entry key="updateMeaning">
+		UPDATE MEANING SET
+		MEANING_NM = ?,
+		POS_CODE = (SELECT POS_CODE FROM PART_OF_SPEECH WHERE POS_NM = ?)
+		WHERE WORD_NO = ?
+		AND MEANING_NO = ?
+		AND DELETE_FL ='N'
+	</entry>
+	
+</properties>

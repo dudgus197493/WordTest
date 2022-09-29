@@ -26,4 +26,18 @@ public interface MemberService {
 	 * @throws Exception
 	 */
 	public int secession(int memberNo) throws Exception;
+	
+	/** 내 정보 조회 서비스
+	 * @return member
+	 * @throws Exception
+	 */
+	public Member selectMyInfo(int memberNo) throws Exception;
+
+	/** 내 정보 변경 (이름, 이메일) 서비스
+	 * @param newMemberName
+	 * @param newEmail
+	 * @return result
+	 * @throws Exception
+	 */
+	public int updateMember(String newMemberName, String newEmail, int memberNo) throws Exception;
 }

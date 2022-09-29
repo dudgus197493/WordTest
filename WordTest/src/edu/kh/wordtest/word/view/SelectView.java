@@ -4,6 +4,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+import edu.kh.wordtest.main.view.MainView;
 import edu.kh.wordtest.word.model.service.WordSelectService;
 import edu.kh.wordtest.word.model.service.WordSelectServiceImpl;
 import edu.kh.wordtest.word.vo.Meaning;
@@ -33,9 +34,9 @@ public class SelectView {
 				switch(input) {
 				case 1: selectAllWord(); break;
 				case 2: searchWord(); break;
-				case 3: break;
+				case 3: selectConquestWord(); break;
 				case 0: System.out.println("\n[이전 화면으로 돌아갑니다.]\n"); break;
-				default:System.out.println("\n[메뉴에 있는 번호를 입력해주세요]\n");
+				default: System.out.println("\n[메뉴에 있는 번호를 입력해주세요]\n");
 				}
 			} while(input != 0);
 			
@@ -112,7 +113,7 @@ public class SelectView {
 			}
 			
 		}catch(Exception e) {
-			System.out.println("\n<< 단어 검색 중 예외 발생 >>\n");
+			System.out.println("\n<< 단어 검색 중 예외 발생 >>\n");	
 			e.printStackTrace();
 		}
 	}
@@ -121,11 +122,14 @@ public class SelectView {
 		int start = (page - 1) * 5 + 1;
 		int end = page * 5;
 		int listSize = wordList.size();
-		System.out.println(listSize);
 		System.out.printf("\n\n[%d 페이지]\n\n", page);
 		for(int i = start; i <= end; i ++) {
 			if(i <= listSize &&  wordList.get(i- 1) != null) {
-				System.out.printf("%d. | %s\n", i, wordList.get(i - 1).getWordName());
+				System.out.printf("   %d.  | %s\n", i, wordList.get(i - 1).getWordName());
+				if(wordList.get(i-1).getAccurateCount() != -1) {
+					System.out.printf("정답 횟수  | %d번\n", wordList.get(i-1).getAccurateCount());
+					System.out.printf("오답 횟수  | %d번\n", wordList.get(i-1).getWrongCount());
+				}
 				System.out.println("--------------------------");
 				for(Meaning m : wordList.get(i - 1).getMeaningList()) {
 					System.out.printf("%s[%s] | %s\n", m.getPosName(), m.getPosCode(), m.getmeaningName());
@@ -161,4 +165,25 @@ public class SelectView {
 			}
 		}
 	}
+	
+	/**
+	 * 내가 정복한 단어 조회
+	 */
+	private void selectConquestWord() {
+		System.out.println("\n[내가 정복한 단어 조회]\n");
+		
+		try {
+			// 서비스 호출
+			List<Word> wordList = service.selectConquestWord(MainView.loginMember.getMemberNo());
+			if(wordList.isEmpty()) {
+				System.out.println("\n[조회된 결과가 없습니다.]\n");
+			} else {
+				printAllWord(wordList, 1);
+			}
+		}catch(Exception e) { 
+			System.out.println("\n<< 내가 정복한 단어 조회 중 예외 발생>>\n");
+			e.printStackTrace();
+		}
+	}
+	
 }

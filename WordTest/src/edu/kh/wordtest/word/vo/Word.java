@@ -8,9 +8,12 @@ public class Word {
 	private int wordNo;				// 단어 번호
 	private String wordName;		// 단어 이름
 	private List<Meaning> meaningList; // 뜻
-	
+	private int accurateCount;		// 정답 횟수
+	private int wrongCount;			// 오답 횟수
 	public Word() {
 		meaningList = new ArrayList<>();
+		this.accurateCount = -1;
+		this.wrongCount = -1;
 	}
 
 	public int getWordNo() {
@@ -48,5 +51,21 @@ public class Word {
 	
 	public void setMeaning(Meaning meaning) { 
 		this.meaningList.add(meaning);
+	}
+
+	public int getAccurateCount() {
+		return accurateCount;
+	}
+
+	public void setAccurateCount(int accurateCount) {
+		this.accurateCount = accurateCount;
+	}
+
+	public int getWrongCount() {
+		return wrongCount;
+	}
+
+	public void setWrongCount(int wrongCount) {
+		this.wrongCount = wrongCount;
 	}
 }

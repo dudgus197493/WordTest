@@ -25,10 +25,8 @@ public interface WordSelectService {
 	public List<Word> searchWord(String keyword, int condition) throws Exception;
 	
 	/** 정복한 단어 검색 서비스 
-	 * @return Word
+	 * @return WordList
 	 * @throws Exception
 	 */
-	
-//	public List<Word> selectAccrateWord() throws Exception;
-	
+	public List<Word> selectConquestWord(int memberNo) throws Exception;
 }

@@ -1,13 +1,18 @@
 package edu.kh.wordtest.test.model.service;
 
-import static edu.kh.wordtest.common.JDBCTemplate.*;
-
+import static edu.kh.wordtest.common.JDBCTemplate.close;
+import static edu.kh.wordtest.common.JDBCTemplate.commit;
+import static edu.kh.wordtest.common.JDBCTemplate.getConnection;
+import static edu.kh.wordtest.common.JDBCTemplate.rollback;
 
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.kh.wordtest.main.view.MainView;
+import edu.kh.wordtest.member.model.dao.MemberDAO;
+import edu.kh.wordtest.member.model.dao.MemberDAOImpl;
+import edu.kh.wordtest.member.vo.Member;
 import edu.kh.wordtest.test.model.dao.TestDAO;
 import edu.kh.wordtest.test.model.dao.TestDAOImpl;
 import edu.kh.wordtest.test.vo.Question;
@@ -16,7 +21,7 @@ import edu.kh.wordtest.word.vo.Word;
 
 public class TestServiceImpl implements TestService{
 	private TestDAO dao = new TestDAOImpl();
-	
+	private MemberDAO mDao = new MemberDAOImpl();
 	@Override
 	public TestPaper creatTestPaper() throws Exception {
 		Connection conn = getConnection();
@@ -61,13 +66,12 @@ public class TestServiceImpl implements TestService{
 		Connection conn = getConnection();
 		int result1 = 0;
 		int result2 = 0;
-		int result3 = 0;
-		int result4 = 0;
 		try {
 			int memberNo = MainView.loginMember.getMemberNo();
 			List<Question> questionList = paper.getQuestionList();
 			List<Integer> wordNoList = new ArrayList<>();
-			
+			List<Integer> wrongWordList = new ArrayList<>();
+			List<Integer> accurateWordList = new ArrayList<>();
 			// 다음 시험번호 가져오기
 			int testNo = dao.nextTestNo(conn);
 			paper.setTestNo(testNo);
@@ -77,7 +81,13 @@ public class TestServiceImpl implements TestService{
 			// 보기 리스트 문자열로 변환
 			for(int i =0; i< questionList.size(); i++) {
 				Question question = questionList.get(i);
+				// 틀린단어 맞춘 단어 분리
 				wordNoList.add(question.getWordNo());
+				if(question.isCorrect()) {
+					accurateWordList.add(question.getWordNo());
+				} else {
+					wrongWordList.add(question.getWordNo());
+				}
 				List<String> exampleList = question.getExampleList();
 				String str = "";
 				for(int j =0; j<exampleList.size(); j++) {
@@ -93,26 +103,18 @@ public class TestServiceImpl implements TestService{
 			// 문제 등록
 			result2 = dao.insertQuestion(conn, paper.getQuestionList(), paper.getTestNo());
 			
-			// 첫 기록인지 확인
-//			int isfirst = dao.checkFirstRecode(conn, memberNo);  
-//			// 첫 기록이면
-//			if(isfirst == 0) {
-//				// 모든 단어 INSERT
-//				for (int i =0; i<wordNoList.size(); i++) {
-//					result3 += dao.insertWordRecode(conn, memberNo, wordNoList.get(i));
-//				}
-//			} else {
-//				for(int i =0; i<wordNoList.size(); i++) {
-//					System.out.println("loop");
-//					int result = dao.checkWordRecode(conn, wordNoList.get(i), memberNo);
-//					if(result == 0) {	// 존재하지 않으면
-//						result += dao.insertWordRecode(conn, memberNo, wordNoList.get(i));
-//					}
-//				}
-//			}
-//			for(int i =0; i<questionList.size(); i++) {
-//				result4 += dao.updateWordCount(conn, questionList.get(i), memberNo);
-//			}
+			// 단어 기록 등록 
+			int result3 = dao.insertWordRecode(conn, wordNoList, memberNo);
+			
+			// 틀린 단어 와 맞춘 단어 분리
+			if(!accurateWordList.isEmpty()) {
+				dao.increaseAccurateCount(conn, accurateWordList, memberNo);
+			}
+			if(!wrongWordList.isEmpty()) {
+				dao.increaseWrongCount(conn, wrongWordList, memberNo);
+			}
+			
+			
 			if(result2 == 10) commit(conn);
 			else 		      rollback(conn);
 		}catch(Exception e) {
@@ -124,5 +126,45 @@ public class TestServiceImpl implements TestService{
 			close(conn);
 		}
 		return result2;
+	}
+
+	@Override
+	public List<TestPaper> selectAllTest() throws Exception {
+		Connection conn =getConnection();
+		
+		List<TestPaper> paperList = dao.selectAllTest(conn, MainView.loginMember.getMemberNo());
+		
+		close(conn);
+		
+		return paperList;
+	}
+
+	@Override
+	public TestPaper selectTest(int testNo) throws Exception {
+		Connection conn = getConnection();
+		
+		TestPaper paper = dao.selectTest(conn, testNo);
+		
+		close(conn);
+		
+		return paper;
+	}
+
+	@Override
+	public Member updateTier(int memberNo) throws Exception {
+		Connection conn = getConnection();
+		
+		int conquestWordCount = dao.getConquestWordCount(conn, memberNo);
+		
+		int result = dao.updateTier(conn, memberNo, conquestWordCount);
+		
+		if(result > 0 ) commit(conn);
+		else			rollback(conn);
+		
+		Member member = mDao.selectMyInfo(conn, memberNo);
+		
+		close(conn);
+		
+		return member;
 	}
 }

@@ -31,4 +31,21 @@ public interface MemberDAO {
 	 * @throws Exception
 	 */
 	public int secession(Connection conn, int memberNo) throws Exception;
+
+	/** 내 정보 조회 DAO
+	 * @param conn
+	 * @param memberNo
+	 * @return member
+	 * @throws Exception
+	 */
+	public Member selectMyInfo(Connection conn, int memberNo) throws Exception;
+	
+	/** 내 정보 변경 DAO
+	 * @param newMemberName
+	 * @param newEmail
+	 * @return result
+	 * @throws Exception
+	 */
+	public int updateMember(Connection conn, String newMemberName, String newEmail, int memberNo) throws Exception;
+	
 }

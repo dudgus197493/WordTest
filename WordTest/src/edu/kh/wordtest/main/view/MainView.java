@@ -3,6 +3,7 @@ package edu.kh.wordtest.main.view;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import edu.kh.wordtest.admin.AdminView;
 import edu.kh.wordtest.main.model.service.MainService;
 import edu.kh.wordtest.main.model.service.MainServiceImpl;
 import edu.kh.wordtest.member.model.service.MemberService;
@@ -10,12 +11,16 @@ import edu.kh.wordtest.member.model.service.MemberServiceImpl;
 import edu.kh.wordtest.member.view.MemberView;
 import edu.kh.wordtest.member.vo.Member;
 import edu.kh.wordtest.test.view.TestView;
+import edu.kh.wordtest.word.view.SelectView;
 import edu.kh.wordtest.word.view.WordView;
 
 public class MainView {
 	private MemberView mView = new MemberView(); 
 	private WordView wView = new WordView();
 	private TestView tView = new TestView();
+	
+	private SelectView sView = new SelectView();
+	private AdminView aView = new AdminView();
 	
 	private MainService mainService = new MainServiceImpl();
 	private MemberService memberService = new MemberServiceImpl();
@@ -26,8 +31,9 @@ public class MainView {
 	private int input = -1;
 	
 	public void mainMenu() {
-		try {
+		
 			do {
+				try {
 				if(loginMember == null) {
 					System.out.println("\n***** 메인 메뉴 *****\n");
 					System.out.println("1. 로그인");
@@ -50,10 +56,14 @@ public class MainView {
 					}
 				
 			} else {
+					boolean isAdmin = MainView.loginMember.getAdminFlag().equals("Y");
 					System.out.printf("\n***** %s의 메뉴 *****\n\n", loginMember.getMemberName());
 					System.out.println("1. 회원 기능");
 					System.out.println("2. 단어 사전");
 					System.out.println("3. 단어 테스트");
+					if(isAdmin) {
+						System.out.println("4. 관리자 기능");
+					}
 					System.out.println("0. 로그아웃");
 					System.out.println("99. 프로그램 종료");
 					
@@ -63,7 +73,7 @@ public class MainView {
 					
 					switch(input) {
 					case 1: mView.memberMenu(); break;			// 회원 관련 메뉴
-					case 2: wView.wordMenu(); break;			// 단어 관련 메뉴
+					case 2: sView.selectMenu();	break;			// 단어 관련 멘
 					case 3: tView.testMenu(); break;
 					case 0: 
 						loginMember = null; 
@@ -71,16 +81,17 @@ public class MainView {
 						System.out.println("\n로그아웃 되었습니다.\n");
 						break;
 					case 99: input = 0; System.out.println("\n[프로그램을 종료합니다.]\n");break;
+					case 4: 
+						if(isAdmin) aView.adminMenu(); break;
 					default:System.out.println("\n[메뉴에 있는 번호를 입력해주세요.]\n");
 					}
 				}
-			} while(input != 0);
-		}catch(InputMismatchException e) {
-			System.out.println("\n<< 입력 형식이 올바르지 않습니다. >>\n");
-			e.printStackTrace();
-			sc.nextLine();
-			input = -1;
-		}
+			}catch(InputMismatchException e) {
+				System.out.println("\n<< 입력 형식이 올바르지 않습니다. >>\n");
+				sc.nextLine();
+				input = -1;
+			} 
+		} while(input != 0);
 	}
 	
 	private void login() {
@@ -104,7 +115,7 @@ public class MainView {
 				System.out.printf("\n[%s님 안녕하세요!]\n", MainView.loginMember.getMemberName());
 			} else { 			// 실패
 				// 메시지 출력
-				System.out.println("회원 정보가 일치하지 않습니다.");
+				System.out.println("\n[회원 정보가 일치하지 않습니다.]\n");
 			}
 		} catch (Exception e) {
 			System.out.println("\\n<< 로그인 중 예외 발생 >>\\n");
@@ -171,7 +182,7 @@ public class MainView {
 				memberGender = sc.next().toUpperCase();
 				
 				if(memberGender.equals("M") || memberGender.equals("F")) break;
-				System.out.println("M 또는 F 중 입력해주세요.");
+				System.out.println("\n[M 또는 F 중 입력해주세요.]\n");
 			}
 			
 			Member member = new Member();

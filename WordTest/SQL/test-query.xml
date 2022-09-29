@@ -41,41 +41,73 @@
 		VALUES(?, ?, ?)
 	</entry>
 	
-	<!-- 첫 기록 여부 확인 -->
-	<entry key="checkFirstRecode">
-		SELECT COUNT(*) CHECK_FIRST FROM WORD_RECODE WHERE MEMBER_NO = ?
+	<!-- 모든 시험 기록 조회 -->
+	<entry key="selectAllTest">
+		SELECT TEST_NO, TEST_SCORE, (SELECT MEMBER_NM FROM "MEMBER" WHERE "MEMBER".MEMBER_NO = TEST_RECODE.MEMBER_NO) MEMBER_NM,
+			CASE 
+				WHEN SYSDATE - TEST_DT &lt; 1/24/60	-- 1분 미만인 경우
+				THEN FLOOR((SYSDATE - TEST_DT) * 24 * 60 * 60) || '초 전'
+				WHEN SYSDATE - TEST_DT &lt; 1/24 -- 1시간 미만인 경우	
+				THEN FLOOR((SYSDATE - TEST_DT) * 24 * 60) || '분 전'
+				WHEN SYSDATE - TEST_DT &lt; 1 -- 하루 미만인 경우	
+				THEN FLOOR((SYSDATE - TEST_DT) * 24) || '시간 전'
+				ELSE TO_CHAR(TEST_DT, 'YYYY-MM-DD')
+			END TEST_DT
+		FROM TEST_RECODE
+		WHERE MEMBER_NO = ?
 	</entry>
-
-	<!-- 단어 기록 등록 -->
+	
+	<!-- 시험 기록 상세 조회 -->
+	<entry key="selectTest">
+		SELECT TEST_NO, TEST_SCORE, MEMBER_NO, EXAMPLE, CORRECT_ANSWER, USER_ANSWER, WORD_NO,
+			(SELECT MEMBER_NM FROM "MEMBER" WHERE "MEMBER".MEMBER_NO = TEST_RECODE.MEMBER_NO) MEMBER_NM,
+			(SELECT WORD_NM FROM WORD WHERE WORD.WORD_NO = QUESTION.WORD_NO) WORD_NM,
+			TO_CHAR(TEST_DT, 'YYYY"년" MM"월" DD"일" HH24:MI:SS') TEST_DT	
+		FROM TEST_RECODE 
+		JOIN QUESTION USING(TEST_NO)
+		WHERE TEST_NO = ?
+	</entry>
+	
+	<!-- 회원별 단어 기록 등록 -->
 	<entry key="insertWordRecode">
-		INSERT INTO WORD_RECODE (RECODE_NO, MEMBER_NO, WORD_NO)
-		VALUES(SEQ_WORD_RECODE_PK.NEXTVAL, ?, ?)
-	</entry>
-	
-	<!-- 파라미터 값중 WORD_RECODE 테이블에 등록되있지 않은 단어 번호 가져오기 -->
-	<entry key="checkWordRecode">
-		SELECT COUNT(*) "CHECK"
+		INSERT INTO WORD_RECODE (WORD_NO, MEMBER_NO) 
+		WITH CHECK_WORD AS (
+			SELECT WORD_NO, ? MEMBER_NO
+			FROM WORD 
+			WHERE WORD_NO IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?))
+		SELECT WORD_NO, CHECK_WORD.MEMBER_NO
 		FROM WORD_RECODE
-		WHERE WORD_NO = ?
-		AND MEMBER_NO = ?
+		FULL JOIN CHECK_WORD USING(WORD_NO)
+		WHERE CHECK_WORD.MEMBER_NO = ?
+		AND ACCURATE_COUNT IS NULL
 	</entry>
 	
-	<!-- 단어 기록 카운트 증가 (정답 횟수) -->
-	<entry key="updateWordCount1">
+	<!-- WORD_RECODE 카운트 갱신 -->
+	<entry key="increaseAccurateCount">
 		UPDATE WORD_RECODE SET
 		ACCURATE_COUNT = ACCURATE_COUNT + 1
-		WHERE WORD_NO = ?
-		AND MEMBER_NO = ?
+		WHERE MEMBER_NO = ?
+		AND WORD_NO IN (<!-- 3, 21, 23, 31); -->
 	</entry>
-	
-	<!-- 단어 기록 카운트 증가 (오답 횟수) -->
-	<entry key="updateWordCount2">
+	<entry key="increaseWrongCount">
 		UPDATE WORD_RECODE SET
 		WRONG_COUNT = WRONG_COUNT + 1
-		WHERE WORD_NO = ?
-		AND MEMBER_NO = ?
+		WHERE MEMBER_NO = ?
+		AND WORD_NO IN ( <!-- 3, 21, 23, 31); -->
 	</entry>
 	
-	<!-- 단어 기록 존재 여부 -->
+	<!-- 회원별 정복한 단어 갯수 구하기 -->
+	<entry key="getConquestWordCount">
+		SELECT COUNT(*) CONQUEST_COUNT FROM WORD_RECODE
+		WHERE MEMBER_NO = ?
+		AND ACCURATE_COUNT > 1
+	</entry>
 	
+	<!-- 회원별 티어 승급 -->
+	<entry key="updateTier">
+		UPDATE "MEMBER" SET 
+		TIER_LEVEL = (SELECT TIER_LEVEL FROM TIER
+			WHERE ? BETWEEN MIN_COUNT AND MAX_COUNT)
+		WHERE MEMBER_NO = ?
+	</entry>
 </properties>

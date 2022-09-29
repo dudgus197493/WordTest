@@ -8,9 +8,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import edu.kh.wordtest.member.vo.Member;
 import edu.kh.wordtest.test.vo.Question;
 import edu.kh.wordtest.test.vo.TestPaper;
 import edu.kh.wordtest.word.vo.Meaning;
@@ -156,60 +158,98 @@ public class TestDAOImpl implements TestDAO{
 	}
 
 	@Override
-	public int checkWordRecode(Connection conn, int wordNo, int memberNo) throws Exception {
-		int result = 0; 
+	public List<TestPaper> selectAllTest(Connection conn, int memberNo) throws Exception {
+		List<TestPaper> paperList = new ArrayList<>();
 		
 		try {
-			String sql = prop.getProperty("checkWordRecode");
+			String sql = prop.getProperty("selectAllTest");
 			
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, wordNo);
-			pstmt.setInt(2, memberNo);
 			
-			rs = pstmt.executeQuery();
-			if(rs.next()) {
-				result = rs.getInt("CHECK");
-			}
-		} finally {
-			close(rs);
-			close(pstmt);
-		}
-		
-		return result;
-	}
-
-	@Override
-	public int checkFirstRecode(Connection conn, int memberNo) throws Exception {
-		int result = 0;
-		
-		try {
-			String sql = prop.getProperty("checkFirstRecode");
-			
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, memberNo);
 			
 			rs = pstmt.executeQuery();
 			
-			if(rs.next()) {
-				result = rs.getInt("CHECK_FIRST");
+			while(rs.next()) {
+				TestPaper paper = new TestPaper();
+				paper.setTestNo(rs.getInt("TEST_NO"));
+				paper.setTestScore(rs.getInt("TEST_SCORE"));
+				paper.setTestDate(rs.getString("TEST_DT"));
+				paper.setMemberName(rs.getString("MEMBER_NM"));
+				paperList.add(paper);
 			}
-		} finally {
+		}finally {
 			close(rs);
 			close(pstmt);
 		}
-		return result;
+		return paperList;
 	}
 
 	@Override
-	public int insertWordRecode(Connection conn, int memberNo, int wordNo) throws Exception {
+	public TestPaper selectTest(Connection conn, int testNo) throws Exception {
+		TestPaper paper = null;
+		try {
+			String sql = prop.getProperty("selectTest");
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, testNo);
+			
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				if(rs.isFirst()) {
+					paper = new TestPaper();
+					paper.setTestNo(rs.getInt("TEST_NO"));
+					paper.setTestScore(rs.getInt("TEST_SCORE"));
+					paper.setTestDate(rs.getString("TEST_DT"));
+					paper.setMemberNo(rs.getInt("MEMBER_NO"));
+					paper.setMemberName(rs.getString("MEMBER_NM"));
+				}
+				Question question = new Question();
+				question.setCorrectAnswer(rs.getInt("CORRECT_ANSWER"));
+				question.setUserAnswer(rs.getInt("USER_ANSWER"));
+				question.setWordNo(rs.getInt("WORD_NO"));
+				question.setWordName(rs.getString("WORD_NM"));
+				
+				String exampleStr = rs.getString("EXAMPLE");
+				String[] arr = exampleStr.split("#");
+				List<String> exampleList = Arrays.asList(arr);
+				question.setExampleList(exampleList);
+				paper.setQuesion(question);
+			}
+			
+		}finally {
+			close(rs);
+			close(pstmt);
+		}
+		return paper;
+	}
+
+	@Override
+	public int insertWordRecode(Connection conn, List<Integer> wordNoList, int memberNo) throws Exception{
+//		INSERT INTO WORD_RECODE (WORD_NO, MEMBER_NO) 
+//		WITH CHECK_WORD AS (
+//			SELECT WORD_NO, ? MEMBER_NO
+//			FROM WORD 
+//			WHERE WORD_NO IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?))
+//		SELECT WORD_NO, CHECK_WORD.MEMBER_NO
+//		FROM WORD_RECODE
+//		FULL JOIN CHECK_WORD USING(WORD_NO)
+//		WHERE CHECK_WORD.MEMBER_NO = ?
+//		AND ACCURAT_COUNT IS NULL
 		int result = 0;
+		
 		try {
 			String sql = prop.getProperty("insertWordRecode");
 			
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, memberNo);
-			pstmt.setInt(2, wordNo);
+			for(int i =0; i<wordNoList.size(); i++) {
+				pstmt.setInt(i+2, wordNoList.get(i));
+			}
+			pstmt.setInt(12, memberNo);
+			
 			result = pstmt.executeUpdate();
+			
 		}finally {
 			close(pstmt);
 		}
@@ -217,24 +257,91 @@ public class TestDAOImpl implements TestDAO{
 	}
 
 	@Override
-	public int updateWordCount(Connection conn, Question question, int memberNo) throws Exception {
+	public int increaseAccurateCount(Connection conn, List<Integer> wordNoList, int memberNo) throws Exception {
+		int result = 0;
+		try {
+			String sql = prop.getProperty("increaseAccurateCount");
+			
+			for(int i =0; i< wordNoList.size(); i++) {
+				if(i == wordNoList.size() -1) {
+					sql += wordNoList.get(i) + ")";
+				} else {
+					sql += wordNoList.get(i) + ", ";
+				}
+			}
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, memberNo);
+			
+			result = pstmt.executeUpdate();
+		}
+		finally {
+			close(pstmt);
+		}
+		return result;
+	}
+
+	@Override
+	public int increaseWrongCount(Connection conn, List<Integer> wordNoList, int memberNo) throws Exception {
+		int result = 0;
+		try {
+			String sql = prop.getProperty("increaseWrongCount");
+			
+			for(int i =0; i< wordNoList.size(); i++) {
+				if(i == wordNoList.size() -1) {
+					sql += wordNoList.get(i) + ")";
+				} else {
+					sql += wordNoList.get(i) + ", ";
+				}
+			}
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, memberNo);
+			
+			result = pstmt.executeUpdate();
+		}
+		finally {
+			close(pstmt);
+		}
+		return result;
+	}
+
+	@Override
+	public int getConquestWordCount(Connection conn, int memberNo) throws Exception {
 		int result = 0;
 		
 		try {
-			String sql = null;
-			if(question.isCorrect()) {		// 정답이면
-				sql = prop.getProperty("updateWordCount1");
-			} else {
-				sql = prop.getProperty("updateWordCount2");
-			}
+			String sql = prop.getProperty("getConquestWordCount");
+			
 			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setInt(1, question.getWordNo());
+			pstmt.setInt(1, memberNo);
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = rs.getInt("CONQUEST_COUNT");
+			}
+			
+		}finally {
+			close(rs);
+			close(pstmt);
+		}
+		return result;
+	}
+
+	@Override
+	public int updateTier(Connection conn, int memberNo, int conquestWordCount) throws Exception {
+		int result = 0;
+		try {
+			String sql = prop.getProperty("updateTier");
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, conquestWordCount);
 			pstmt.setInt(2, memberNo);
 			
 			result = pstmt.executeUpdate();
-			
-		}finally {
+		} finally {
+			close(rs);
 			close(pstmt);
 		}
 		return result;

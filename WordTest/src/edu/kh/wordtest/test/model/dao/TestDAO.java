@@ -3,6 +3,7 @@ package edu.kh.wordtest.test.model.dao;
 import java.sql.Connection;
 import java.util.List;
 
+import edu.kh.wordtest.member.vo.Member;
 import edu.kh.wordtest.test.vo.Question;
 import edu.kh.wordtest.test.vo.TestPaper;
 import edu.kh.wordtest.word.vo.Word;
@@ -36,38 +37,59 @@ public interface TestDAO {
 	 */
 	public int insertQuestion(Connection conn, List<Question> questionList, int testNo) throws Exception;
 	
-	
-	/** 테이블에 존재하지 않는 단어 번호 반환 DAO
-	 * @param conn
-	 * @param wordNo
-	 * @param memberNo
-	 * @return notExWordNoList
-	 */
-	public int checkWordRecode(Connection conn, int wordNo, int memberNo) throws Exception;
-	
-	/** 첫 기록인지 확인하는 DAO
+	/** 모든 시험 기록 조회 DAO
 	 * @param conn
 	 * @param memberNo
-	 * @return result (처음이면 0)
+	 * @return paperList
+	 * @throws Exception
 	 */
-	public int checkFirstRecode(Connection conn, int memberNo) throws Exception;
-	
-	
+	public List<TestPaper> selectAllTest(Connection conn, int memberNo) throws Exception;
+
+	/** 시험 기록 상세 조회 DAO
+	 * @param conn
+	 * @param testNo
+	 * @return paper
+	 * @throws Exception
+	 */
+	public TestPaper selectTest(Connection conn, int testNo) throws Exception;
+
 	/** 단어 기록 등록 DAO
 	 * @param conn
+	 * @param wordNoList
 	 * @param memberNo
-	 * @param wordNo
+	 */
+	public int insertWordRecode(Connection conn, List<Integer> wordNoList, int memberNo) throws Exception;
+	
+	/** 정답 카운트 증가 DAO
+	 * @param conn
+	 * @param wordNoList
+	 * @param memberNo
 	 * @return result
 	 * @throws Exception
 	 */
-	public int insertWordRecode(Connection conn, int memberNo, int wordNo) throws Exception;
+	public int increaseAccurateCount(Connection conn, List<Integer> wordNoList, int memberNo) throws Exception;
 	
-	/** 회원별 단어 기록 카운트 증가 DAO
+	/** 오답 카운트 증가
 	 * @param conn
-	 * @param question	맞은 문제면 correctCount + 1, 틀린문제면 wrongCount + 1
+	 * @param wordNoList
 	 * @param memberNo
-	 * @return result (성공 10)
+	 * @return resulta
 	 * @throws Exception
 	 */
-	public int updateWordCount(Connection conn, Question question, int memberNo) throws Exception;
+	public int increaseWrongCount(Connection conn, List<Integer> wordNoList, int memberNo) throws Exception;
+	
+	/** 정복한 단어 갯수 구하기 DAO
+	 * @param conn
+	 * @param memberNo
+	 * @return conquestWordCount
+	 * @throws Exception
+	 */
+	public int getConquestWordCount(Connection conn, int memberNo)  throws Exception;
+	
+	/** 회원 티어 승급 DAO
+	 * @param memberNo
+	 * @return member
+	 * @throws Exception
+	 */
+	public int updateTier(Connection conn, int memberNo, int conquestWordCount) throws Exception;
 }

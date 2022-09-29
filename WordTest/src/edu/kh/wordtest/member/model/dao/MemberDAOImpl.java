@@ -88,4 +88,58 @@ public class MemberDAOImpl implements MemberDAO{
 		return result;
 	}
 
+
+	@Override
+	public Member selectMyInfo(Connection conn, int memberNo) throws Exception {
+		Member member = null;
+		
+		try {
+			String sql = prop.getProperty("selectMyInfo");
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, memberNo);
+			
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				member = new Member();
+				member.setMemberNo(rs.getInt("MEMBER_NO"));
+				member.setMemberId(rs.getString("MEMBER_ID"));
+				member.setMemberName(rs.getString("MEMBER_NM"));
+				member.setMemberGender(rs.getString("MEMBER_GENDER"));
+				member.setTierLevel(rs.getString("TIER_LEVEL"));
+				member.setAdminFlag(rs.getString("ADMIN_FL"));
+				member.setEmail(rs.getString("EMAIL"));
+				member.setEnrollDate(rs.getString("ENROLL_DT"));
+				member.setTierName(rs.getString("TIER_NM"));
+				member.setConquestCount(rs.getInt("CONQUEST_COUNT"));
+			}
+		}finally {
+			close(rs);
+			close(pstmt);
+		}
+		return member;
+	}
+
+
+	@Override
+	public int updateMember(Connection conn, String newMemberName, String newEmail, int memberNo) throws Exception {
+		int result = 0;
+		
+		try {
+			String sql = prop.getProperty("updateMember");
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, newMemberName);
+			pstmt.setString(2, newEmail);
+			pstmt.setInt(3, memberNo);
+			
+			result = pstmt.executeUpdate();
+			
+		}finally {
+			close(conn);
+		}
+		
+		return result;
+	}
 }

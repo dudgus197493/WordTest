@@ -40,17 +40,18 @@ public class MainDAOImpl implements MainDAO{
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()) {
-				//MEMBER_NO, MEMBER_ID, MEMBER_NM, MEMBER_NNO, MEMBER_GENDER, ENROLL_DT, TIER_LEVEL, ADMIN_FL
 				loginMember = new Member();
 				loginMember.setMemberNo(rs.getInt("MEMBER_NO"));
-				loginMember.setMemberId(memberId);
+				loginMember.setMemberId(rs.getString("MEMBER_ID"));
 				loginMember.setMemberName(rs.getString("MEMBER_NM"));
-				loginMember.setMemberNno(rs.getString("MEMBER_NNO"));
-				loginMember.setEmail(rs.getString("EMAIL"));
 				loginMember.setMemberGender(rs.getString("MEMBER_GENDER"));
-				loginMember.setEnrollDate(rs.getString("ENROLL_DT"));
 				loginMember.setTierLevel(rs.getString("TIER_LEVEL"));
 				loginMember.setAdminFlag(rs.getString("ADMIN_FL"));
+				loginMember.setMemberNno(rs.getString("MEMBER_NNO"));
+				loginMember.setEmail(rs.getString("EMAIL"));
+				loginMember.setEnrollDate(rs.getString("ENROLL_DT"));
+				loginMember.setTierName(rs.getString("TIER_NM"));
+				loginMember.setConquestCount(rs.getInt("CONQUEST_COUNT"));
 			}
 		} finally {
 			close(rs);

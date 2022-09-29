@@ -16,16 +16,11 @@ public class MemberView {
 	 * 회원 메뉴
 	 */
 	public void memberMenu() {
-		 /* 1. 내 정보 조회
-		 * 2. 회원 목록 조회(아이디, 이름, 성별)
-		 * 3. 내 정보 수정(이름, 성별)
-		 * 4. 비밀번호변경(현재 비밀번호, 새 비밀번호, 새 비밀번호 확인)
-		 * 5. 회원 탈퇴 */
 		do {
 			try {
 				System.out.println("\n***** 회원 기능 *****\n");
 				System.out.println("1. 내 정보 조회");
-				System.out.println("2. 내 정보 수정(이름, 성별)");
+				System.out.println("2. 내 정보 변경(이름, 이메일)");
 				System.out.println("3. 비밀번호 변경(현재 비밀번호, 새 비밀번호, 새 비밀번호 확인)");	// 1. 한번에 받기
 																						// 2. 비밀번호 일치 선확인 후 변경할 비밀번호 받기
 				System.out.println("4. 회원 탈퇴");
@@ -36,11 +31,10 @@ public class MemberView {
 				sc.nextLine();
 				
 				switch(input) {
-				case 1:  break;
-				case 2:  break;
+				case 1: printMyInfo(); break;
+				case 2: updateMember(); break;
 				case 3: updateMemberPw(); break;
 				case 4: secession(); break;
-				case 5:  break;
 				case 0: System.out.println("[메인 메뉴로 이동합니다.]"); break;
 				default : System.out.println("메뉴에 작성된 번호만 입력해주세요.");
 				}
@@ -51,6 +45,49 @@ public class MemberView {
 				input = -1;
 			}			
 		}while(input != 0);
+	}
+	
+	public void updateMember() {
+		System.out.println("\n[내 정보 변경 (이름, 이메일)]\n");
+		try {
+			System.out.print("변경할 이름 : ");
+			String newMemberName = sc.next();
+			
+			System.out.print("변경할 이메일 : ");
+			String newEmail = sc.next();
+			
+			int result = service.updateMember(newMemberName, newEmail, MainView.loginMember.getMemberNo());
+			if(result > 0) {
+				System.out.println("\n[내 정보 변경 성공]\n");
+				MainView.loginMember.setMemberName(newMemberName);
+				MainView.loginMember.setEmail(newEmail);
+				printMyInfo();
+			} else {
+				System.out.println("\n[내 정보 변경 실패..]\n");
+			}
+			
+		}catch(Exception e) {
+			System.out.println("\n <<내 정보 수정 중 예외 발생>>");
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 내정보 조회
+	 */
+	public void printMyInfo() {
+		System.out.println("\n[내 정보 조회]\n");
+		
+		Member loginMember = MainView.loginMember;
+		System.out.println("회원 번호 	| " + loginMember.getMemberNo());
+		System.out.println("아이디   	| " + loginMember.getMemberId());
+		System.out.println("이름    	| " + loginMember.getMemberName());
+		System.out.println("주민등록번호| " + loginMember.getMemberNno());
+		System.out.printf("성별      | %s\n", loginMember.getMemberGender().equals("M") ? "남자" : "여자");
+		System.out.println("이메일	| " + loginMember.getEmail());
+		System.out.printf("현재 티어	| %s[%s]\n",loginMember.getTierName(), loginMember.getTierLevel());
+		System.out.println("회원 가입일	| " + loginMember.getEnrollDate());
+		System.out.printf("정복한 단어 | %d개", loginMember.getConquestCount());
 	}
 	
 	/**
